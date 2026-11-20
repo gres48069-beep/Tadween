@@ -29,13 +29,25 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
-      - name: Build iOS Release (No Codesign)
-        run: flutter build ios --release --no-codesign
+      - name: Prepare Flutter iOS config
+        run: flutter build ios --config-only --release --no-codesign
+
+      - name: Build iOS App via xcodebuild (Unsigned)
+        run: |
+          cd ios
+          xcodebuild -workspace Runner.xcworkspace \
+            -scheme Runner \
+            -configuration Release \
+            -sdk iphoneos \
+            -derivedDataPath build \
+            CODE_SIGN_IDENTITY="" \
+            CODE_SIGNING_REQUIRED=NO \
+            CODE_SIGNING_ALLOWED=NO
 
       - name: Package into IPA
         run: |
           mkdir -p Payload
-          cp -r build/ios/iphoneos/Runner.app Payload/
+          cp -r ios/build/Build/Products/Release-iphoneos/Runner.app Payload/
           zip -r tadween.ipa Payload
 
       - name: Upload IPA Artifact
