@@ -29,6 +29,9 @@ jobs:
       - name: Install dependencies
         run: flutter pub get
 
+      - name: Analyze Dart code
+        run: flutter analyze --no-fatal-infos
+
       - name: Prepare Flutter iOS config
         run: flutter build ios --config-only --release --no-codesign
 
@@ -39,7 +42,7 @@ jobs:
             -scheme Runner \
             -configuration Release \
             -sdk iphoneos \
-            -derivedDataPath build \
+            SYMROOT=$(pwd)/../build/ios \
             CODE_SIGN_IDENTITY="" \
             CODE_SIGNING_REQUIRED=NO \
             CODE_SIGNING_ALLOWED=NO
@@ -47,7 +50,7 @@ jobs:
       - name: Package into IPA
         run: |
           mkdir -p Payload
-          cp -r ios/build/Build/Products/Release-iphoneos/Runner.app Payload/
+          cp -r build/ios/Release-iphoneos/Runner.app Payload/
           zip -r tadween.ipa Payload
 
       - name: Upload IPA Artifact
